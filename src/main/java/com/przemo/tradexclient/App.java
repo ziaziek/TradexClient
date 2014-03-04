@@ -1,7 +1,7 @@
 package com.przemo.tradexclient;
 
 import com.przemo.tradexclient.gui.MainWindow;
-import javax.swing.JFrame;
+import com.przemo.tradexclient.remote.RemoteAction;
 import javax.swing.SwingUtilities;
 
 /**
@@ -10,17 +10,9 @@ import javax.swing.SwingUtilities;
  */
 public class App {
 
-    static String sessionId= null;
-    public static String SERVER_ADDR = "localhost"; //TODO: change to a property
-    public static String getSessionId() {
-        return sessionId;
-    }
 
-    public static void setSessionId(String sessionId) {
-        App.sessionId = sessionId;
-    }
-    
     public static void main(String[] args) {
+        RemoteAction.initRegistry(ConnectionHolder.SERVER_ADDR, 6020);
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 MainWindow mw = new MainWindow();

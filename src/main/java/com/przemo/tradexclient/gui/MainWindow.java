@@ -4,9 +4,13 @@
  */
 package com.przemo.tradexclient.gui;
 
+import com.jidesoft.dialog.JideOptionPane;
 import com.jidesoft.swing.JideMenu;
 import com.przemo.tradexclient.App;
+import com.przemo.tradexclient.ConnectionHolder;
 import com.przemo.tradexclient.interfaces.ILoginSensitive;
+import com.przemo.tradexclient.remote.RemoteAction;
+import com.przemo.tradexclient.remote.RemoteActionInitializationException;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -20,6 +24,10 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -52,9 +60,10 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
         }       
         mainPanel();
         buildStatusPanel();
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         this.addWindowListener(this);
+        ConnectionHolder.registerLoginSensitive(this);
     }
     
     final void mainPanel(){
@@ -81,7 +90,16 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
     }
     
     private void handleClosing(){
-        System.out.println("Window gets closed");
+        if (JideOptionPane.showConfirmDialog(this, "Are you sure you want to exit?", "Tradex Client", JideOptionPane.YES_NO_OPTION) == JideOptionPane.YES_OPTION) {
+            if (ConnectionHolder.getSessionId() != null) {
+                try {
+                    RemoteAction.logOut();
+                } catch (RemoteActionInitializationException | RemoteException | NotBoundException ex) {
+                    Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            System.exit(0);
+        }
     }
     
     @Override
@@ -95,17 +113,19 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
         switch(currentOption){
             case MenuBuilder.EXIT:
                 handleClosing();
-                 this.dispose();
             break;
             case MenuBuilder.CONNECT:
                 LoginForm lf = new LoginForm();
                 lf.setVisible(true);
-                lf.addLoginSensitive(this);
                 Dimension dScreen = Toolkit.getDefaultToolkit().getScreenSize();
                 lf.setLocation((int)((dScreen.getWidth()- lf.getWidth())/2) , (int)((dScreen.getHeight() - lf.getHeight())/2));
                 break;
             case MenuBuilder.DISCONNECT:
-                
+                try {
+                    RemoteAction.logOut();
+                } catch (RemoteActionInitializationException | RemoteException | NotBoundException ex) {
+                    Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 break;
             case MenuBuilder.SHOW_AVAILABLE:
                 

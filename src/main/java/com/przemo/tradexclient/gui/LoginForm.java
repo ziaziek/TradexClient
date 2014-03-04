@@ -4,25 +4,17 @@
  */
 package com.przemo.tradexclient.gui;
 
-import com.jidesoft.dialog.ButtonPanel;
-import com.jidesoft.dialog.StandardDialog;
-import com.przemo.tradex.interfaces.ILoginController;
-import com.przemo.tradexclient.App;
 import com.przemo.tradexclient.interfaces.ILoginSensitive;
+import com.przemo.tradexclient.remote.RemoteAction;
+import com.przemo.tradexclient.remote.RemoteActionInitializationException;
 import java.awt.Dimension;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.rmi.AccessException;
 import java.rmi.NotBoundException;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JComponent;
 
 /**
  *
@@ -30,14 +22,12 @@ import javax.swing.JComponent;
  */
 public class LoginForm extends javax.swing.JFrame {
 
-    private List<ILoginSensitive> loginListeners;
     
     /**
      * Creates new form LoginForm
      */
     public LoginForm() {
         initComponents();
-        loginListeners = new ArrayList<>();
     }
 
     /**
@@ -128,40 +118,29 @@ public class LoginForm extends javax.swing.JFrame {
         // TODO add your handling code here:
         String message = null;
         if(txtLogin.getText().length()>0 && pswrdField.getPassword().length>0){
-            try {
-                Registry reg = LocateRegistry.getRegistry(App.SERVER_ADDR, 6020);
-                ILoginController ctrl = (ILoginController) reg.lookup(ILoginController.loginController_ID);
-                App.setSessionId(ctrl.loginRequest(txtLogin.getText(), pswrdField.getText(), InetAddress.getLocalHost().getHostAddress()));
-                if(App.getSessionId()==null){
+            try {              
+                if(!RemoteAction.logIn(txtLogin.getText(), pswrdField.getText())){
                     message = "Could not log in.";
-                } else {
-                    notifyLoginSensitives(true);
-                    this.dispose();
                 }
             } catch (RemoteException | NotBoundException | UnknownHostException ex) {
                 Logger.getLogger(LoginForm.class.getName()).log(Level.SEVERE, null, ex);
                 message = ex.getMessage();
+            } catch (RemoteActionInitializationException ex) {
+                Logger.getLogger(LoginForm.class.getName()).log(Level.SEVERE, null, ex);
             }
             if(message!=null){
                 OKMessageBox msg = new OKMessageBox(this, message, "Login attempt");    
                 msg.setLocation(this.getX(), this.getY());
                 msg.setSize(new Dimension(500,150));
                 msg.setVisible(true);
+            } else {
+                this.dispose();
             }
         } else {
             txtLogin.requestFocusInWindow();
         }
     }//GEN-LAST:event_btnLoginActionPerformed
 
-public void addLoginSensitive(ILoginSensitive l){
-    this.loginListeners.add(l);
-}
-
-protected void notifyLoginSensitives(boolean isLoggedIn){
-    for(ILoginSensitive ls: loginListeners){
-        ls.loginChanged(isLoggedIn);
-    }
-}
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnLogin;
