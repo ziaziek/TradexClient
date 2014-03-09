@@ -4,6 +4,8 @@
  */
 package com.przemo.tradexclient.remote;
 
+import com.przemo.tradex.data.Equities;
+import com.przemo.tradex.interfaces.IInfoController;
 import com.przemo.tradex.interfaces.ILoginController;
 import com.przemo.tradexclient.App;
 import com.przemo.tradexclient.ConnectionHolder;
@@ -13,6 +15,8 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,5 +57,11 @@ public class RemoteAction {
             ConnectionHolder.setSessionId(null);
         }
         return v;
+    }
+    
+    public static Set<Equities> getEquities(String sessId) throws RemoteActionInitializationException, RemoteException, NotBoundException{
+        IInfoController ctrl = (IInfoController) getRegistry().lookup(IInfoController.infoController_ID);
+        Set<Equities> ret = ctrl.requestAvailableInstruments(sessId);
+        return ret;
     }
 }
