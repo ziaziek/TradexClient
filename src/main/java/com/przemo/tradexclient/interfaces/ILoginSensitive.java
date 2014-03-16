@@ -9,5 +9,5 @@ package com.przemo.tradexclient.interfaces;
  * @author Przemo
  */
 public interface ILoginSensitive {
-    void loginChanged(boolean isLoggedin);
+    void loginUpdate(boolean isLoggedin);
 }

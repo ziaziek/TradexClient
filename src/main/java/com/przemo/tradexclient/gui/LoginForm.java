@@ -4,15 +4,12 @@
  */
 package com.przemo.tradexclient.gui;
 
-import com.przemo.tradexclient.interfaces.ILoginSensitive;
 import com.przemo.tradexclient.remote.RemoteAction;
 import com.przemo.tradexclient.remote.RemoteActionInitializationException;
 import java.awt.Dimension;
 import java.net.UnknownHostException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

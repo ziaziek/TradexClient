@@ -6,7 +6,6 @@ package com.przemo.tradexclient.gui;
 
 import com.jidesoft.dialog.JideOptionPane;
 import com.jidesoft.swing.JideMenu;
-import com.przemo.tradex.data.Equities;
 import com.przemo.tradexclient.ConnectionHolder;
 import com.przemo.tradexclient.interfaces.ILoginSensitive;
 import com.przemo.tradexclient.remote.RemoteAction;
@@ -21,8 +20,6 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
@@ -61,7 +58,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         this.addWindowListener(this);
-        ConnectionHolder.registerLoginSensitive(this);
+        ConnectionHolder.registerLoginSensitive(this);     
     }
     
     final void buildEquitiesPanel(){
@@ -103,13 +100,14 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
                     Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
+            ConnectionHolder.stopMonitoring();
             System.exit(0);
         }
     }
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        String currentOption=null;
+        String currentOption;
         if(e.getSource() instanceof JMenuItem){
             currentOption = ((JMenuItem)e.getSource()).getText();
         } else {
@@ -174,7 +172,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
     }
 
     @Override
-    public void loginChanged(boolean isLoggedin) {
+    public void loginUpdate(boolean isLoggedin) {
         if(isLoggedin){
             loggedInAs.setText("Logged In");
             refreshEquitiesPanel();    
