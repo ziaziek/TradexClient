@@ -19,7 +19,7 @@ public class ConnectionHolder {
     static String sessionId= null;
     public static String SERVER_ADDR = "localhost"; //TODO: change to a property
     private static long interval = 0;
-    private static final long default_interval = 2500;
+    private static final long default_interval = 5500;
     public static long getInterval() {
         return interval;
     }

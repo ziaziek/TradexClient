@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.Set;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
@@ -40,35 +41,40 @@ public class AvailableEquitiesPanel extends JPanel{
         fillEquitiesPanel();
     }
     
-    private void fillEquitiesPanel(){   
-        if(model==null){
-            model = new DefaultTableModel(){
+    private void fillEquitiesPanel() {
+        if (model == null) {
+            model = new DefaultTableModel() {
                 @Override
-                public boolean isCellEditable(int row, int col){
+                public boolean isCellEditable(int row, int col) {
                     return false;
                 }
-                
             };
             model.addTableModelListener(tab);
             tab.setModel(model);
         }
-        Object[][] res = convertEquitiesToTable(equities);
-        if(res.length!=model.getRowCount()){
+        final Object[][] res = convertEquitiesToTable(equities);
+
+        if (res.length != model.getRowCount()) {
             model.setDataVector(res, columns);
         } else {
-            for(int i=0; i<equities.size(); i++){
-                for(int j=0; j<columns.length; j++){
-                    if(model.getValueAt(i, j)!=res[i][j]){
+            for (int i = 0; i < equities.size(); i++) {
+                for (int j = 0; j < columns.length; j++) {
+                    if (model.getValueAt(i, j) != res[i][j]) {
                         model.setValueAt(res[i][j], i, j);
-                        
+                        System.out.println("Setting a value");
                     }
                 }
             }
         }
-        tab.revalidate();
-        if(tab.getDefaultRenderer(Object.class) instanceof ChangedValueCellRenderer){
-                ((ChangedValueCellRenderer)tab.getDefaultRenderer(Object.class)).setPreviousState(res);
-            }
+        if (tab.getDefaultRenderer(Object.class) instanceof ChangedValueCellRenderer) {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    ((ChangedValueCellRenderer) tab.getDefaultRenderer(Object.class)).repaint();
+                    ((ChangedValueCellRenderer) tab.getDefaultRenderer(Object.class)).setPreviousState(res.clone());
+                }
+            });
+        }
     }
 
     private Object[][] convertEquitiesToTable(Set<Equities> equities) {
@@ -101,13 +107,13 @@ public class AvailableEquitiesPanel extends JPanel{
         public Component getTableCellRendererComponent(JTable table, Object o, boolean isSelected, boolean isFocused, int row, int col){
             Component c = super.getTableCellRendererComponent(table, o, isSelected, isFocused, row, col);
             //we will check only against these two cases
-            System.out.println("o class is."+ o.getClass().getName());
             if(o instanceof Double && getPreviousState()!=null){
-                System.out.println("Checking values.");
-                if((Double)o > (Double)getPreviousState()[row][col]){
+                if((Double)o > (Double)getPreviousState()[row][col]){                 
                     c.setForeground(Color.green);
-                } else {
+                } else if((Double)o < (Double)getPreviousState()[row][col]) {
                     c.setForeground(Color.red);
+                } else {
+                    c.setForeground(Color.black);
                 }
             } else {
                 c.setForeground(Color.black);
