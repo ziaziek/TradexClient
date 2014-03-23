@@ -28,6 +28,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 /**
  *
  * @author Przemo
@@ -37,6 +38,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
     JideMenu mainMenu = null;
     JPanel mainPanel = null;
     JPanel statusBar=null;
+    JPanel AccountHistory=null;
     JLabel loggedInAs=null;
     AvailableEquitiesPanel eqPanel = null;
     
@@ -55,6 +57,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
         mainPanel(); 
         buildStatusPanel();
         buildEquitiesPanel();
+        buildAccountHistoryPanel();
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         this.addWindowListener(this);
@@ -69,7 +72,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
         }     
     }
     final void mainPanel(){
-        mainPanel = new JPanel();
+        mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(Color.red);
         mainPanel.setPreferredSize(new Dimension(150, 150));
         this.add(mainPanel, BorderLayout.CENTER);
@@ -90,6 +93,17 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
         statusBar.setBorder(BorderFactory.createEtchedBorder());
         add(statusBar, BorderLayout.SOUTH);
     }
+    
+    final void buildAccountHistoryPanel(){
+        if(AccountHistory==null){
+            AccountHistory = new AccountInfoPanel();
+        }
+        mainPanel.add(AccountHistory, BorderLayout.SOUTH);
+        if(AccountHistory instanceof ILoginSensitive){
+          ConnectionHolder.registerLoginSensitive((ILoginSensitive) AccountHistory);  
+        }   
+    }
+    
     
     private void handleClosing(){
         if (JideOptionPane.showConfirmDialog(this, "Are you sure you want to exit?", "Tradex Client", JideOptionPane.YES_NO_OPTION) == JideOptionPane.YES_OPTION) {

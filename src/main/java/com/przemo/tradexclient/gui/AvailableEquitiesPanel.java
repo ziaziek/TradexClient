@@ -43,12 +43,7 @@ public class AvailableEquitiesPanel extends JPanel{
     
     private void fillEquitiesPanel() {
         if (model == null) {
-            model = new DefaultTableModel() {
-                @Override
-                public boolean isCellEditable(int row, int col) {
-                    return false;
-                }
-            };
+            model = new ReadOnlyTableCellModel();
             model.addTableModelListener(tab);
             tab.setModel(model);
         }
