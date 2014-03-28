@@ -5,10 +5,18 @@
 package com.przemo.tradexclient.gui;
 
 import com.przemo.tradex.data.Equities;
+import com.przemo.tradexclient.ConnectionHolder;
+import com.przemo.tradexclient.interfaces.IUpdateRequiring;
+import com.przemo.tradexclient.remote.RemoteAction;
+import com.przemo.tradexclient.remote.RemoteActionInitializationException;
 import java.awt.Color;
 import java.awt.Component;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
@@ -19,7 +27,7 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author Przemo
  */
-public class AvailableEquitiesPanel extends JPanel{
+public class AvailableEquitiesPanel extends JPanel implements IUpdateRequiring{
     
     Set<Equities> equities =null;
     JTable tab = null;
@@ -39,6 +47,20 @@ public class AvailableEquitiesPanel extends JPanel{
     public void setEquities(Set<Equities> eq){
         equities=eq;
         fillEquitiesPanel();
+    }
+    
+    public Equities getCurrentlySelected(){
+     if(equities!=null && model!=null && tab!=null && tab.getSelectedRow()>-1){
+         Iterator<Equities> it = equities.iterator();
+         boolean found = false;
+         Equities currentEq=null;
+         while(it.hasNext() && !found){
+             currentEq=it.next();
+             found=currentEq.getEquitySymbol().equals(model.getValueAt(tab.getSelectedRow(), 0));
+         }     
+         return currentEq;
+     }
+        return null;
     }
     
     private void fillEquitiesPanel() {
@@ -84,6 +106,15 @@ public class AvailableEquitiesPanel extends JPanel{
             i++;
         }
         return o;
+    }
+
+    @Override
+    public void updateData() {
+        try {
+            setEquities(RemoteAction.getEquities(ConnectionHolder.getSessionId()));
+        } catch (RemoteActionInitializationException | RemoteException | NotBoundException ex) {
+            Logger.getLogger(AvailableEquitiesPanel.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     private class ChangedValueCellRenderer extends DefaultTableCellRenderer{

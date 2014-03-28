@@ -5,6 +5,7 @@
 package com.przemo.tradexclient;
 
 import com.przemo.tradexclient.interfaces.ILoginSensitive;
+import com.przemo.tradexclient.interfaces.IUpdateRequiring;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -36,6 +37,8 @@ public class ConnectionHolder {
     
     private static List<ILoginSensitive> loginSensitives;
     
+    private static List<IUpdateRequiring> updateRequiring;
+    
     private static Thread th = null;
     
     public static void startMonitoring(){
@@ -48,7 +51,7 @@ public class ConnectionHolder {
             public void run(){
                 while(sessionId!=null){
                   try {
-                       notifyLoginSensitiveObjects(sessionId!=null); 
+                       notifyUpdateRequired();
                        //System.out.println("Notified listeners at "+ (new Date()).toString());
                        sleep(interval);
                 } catch (InterruptedException ex) {
@@ -102,11 +105,38 @@ public class ConnectionHolder {
         return getLoginSensitives().contains(l);
     }
     
+    public static void registerUpdateRequiring(IUpdateRequiring l){
+        if(!getUpdateRequiring().contains(l)){
+            getUpdateRequiring().add(l);
+        }
+    }
+    
+    public static void unregisterUpdateRequiring(IUpdateRequiring l){
+        if(getUpdateRequiring().contains(l)){
+            getUpdateRequiring().remove(l);
+        }
+    }
+    
+    public static void notifyUpdateRequired(){
+        for(IUpdateRequiring iu : updateRequiring){
+            if(iu!=null){
+             iu.updateData();   
+            }
+        }
+    }
+    
     public static void notifyLoginSensitiveObjects(boolean login){
         for(ILoginSensitive l: getLoginSensitives()){
             if(l!=null){
                l.loginUpdate(login); 
             } 
         }
+    }
+
+    private static List getUpdateRequiring() {
+        if(updateRequiring==null){
+            updateRequiring = new ArrayList();
+        }
+        return updateRequiring;
     }
 }

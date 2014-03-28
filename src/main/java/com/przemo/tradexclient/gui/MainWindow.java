@@ -8,6 +8,7 @@ import com.jidesoft.dialog.JideOptionPane;
 import com.jidesoft.swing.JideMenu;
 import com.przemo.tradexclient.ConnectionHolder;
 import com.przemo.tradexclient.interfaces.ILoginSensitive;
+import com.przemo.tradexclient.interfaces.IUpdateRequiring;
 import com.przemo.tradexclient.remote.RemoteAction;
 import com.przemo.tradexclient.remote.RemoteActionInitializationException;
 import java.awt.BorderLayout;
@@ -28,7 +29,6 @@ import javax.swing.JLabel;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 /**
  *
  * @author Przemo
@@ -100,8 +100,11 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
         }
         mainPanel.add(AccountHistory, BorderLayout.SOUTH);
         if(AccountHistory instanceof ILoginSensitive){
-          ConnectionHolder.registerLoginSensitive((ILoginSensitive) AccountHistory);  
-        }   
+          ConnectionHolder.registerLoginSensitive((ILoginSensitive) AccountHistory);       
+        }
+        if(AccountHistory instanceof IUpdateRequiring){
+           ConnectionHolder.registerUpdateRequiring((IUpdateRequiring) AccountHistory); 
+        }
     }
     
     
@@ -148,10 +151,13 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
                 
                 break;
             case MenuBuilder.RELOAD_AVAILABLE:
-                refreshEquitiesPanel();
+                eqPanel.updateData();
                 break;
             case MenuBuilder.OPEN_CHART_WINDOW:
                 
+                break;
+            case MenuBuilder.PLACE_ORDER:
+                new PlaceOrderForm(eqPanel.getCurrentlySelected()).setVisible(true);
                 break;
         }
     }
@@ -189,17 +195,14 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
     public void loginUpdate(boolean isLoggedin) {
         if(isLoggedin){
             loggedInAs.setText("Logged In");
-            refreshEquitiesPanel();    
+               try {
+                eqPanel.setEquities(RemoteAction.getEquities(ConnectionHolder.getSessionId()));
+            } catch (RemoteActionInitializationException | RemoteException | NotBoundException ex) {
+                Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+            }
         } else {
             loggedInAs.setText("NOT logged in");
         }
     }
 
-    private void refreshEquitiesPanel(){
-        try {
-                eqPanel.setEquities(RemoteAction.getEquities(ConnectionHolder.getSessionId()));
-            } catch (RemoteActionInitializationException | RemoteException | NotBoundException ex) {
-                Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
-            }
-    }
 }

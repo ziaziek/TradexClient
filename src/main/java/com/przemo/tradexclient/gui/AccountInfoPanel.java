@@ -4,15 +4,14 @@
  */
 package com.przemo.tradexclient.gui;
 
-import com.przemo.tradex.data.UserSessions;
 import com.przemo.tradexclient.ConnectionHolder;
 import com.przemo.tradexclient.datamodels.ModelCreator;
 import com.przemo.tradexclient.interfaces.ILoginSensitive;
+import com.przemo.tradexclient.interfaces.IUpdateRequiring;
 import com.przemo.tradexclient.remote.RemoteAction;
 import com.przemo.tradexclient.remote.RemoteActionInitializationException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.table.DefaultTableModel;
@@ -21,7 +20,7 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author Przemo
  */
-public class AccountInfoPanel extends javax.swing.JPanel implements ILoginSensitive {
+public class AccountInfoPanel extends javax.swing.JPanel implements ILoginSensitive, IUpdateRequiring {
 
     DefaultTableModel activityModel, transactionsModel = null;
     
@@ -168,10 +167,12 @@ public class AccountInfoPanel extends javax.swing.JPanel implements ILoginSensit
         if(activityModel==null){
                 activityModel= createEmptyModel(ModelCreator.getActivityModelColumns());
                 logActivityTable.setModel(activityModel);
+                activityModel.addTableModelListener(logActivityTable);
             }
         if(transactionsModel==null){
             transactionsModel = createEmptyModel(ModelCreator.getTransactionsModelColumns());
             transactionsTable.setModel(transactionsModel);
+            transactionsModel.addTableModelListener(transactionsTable);
         }
     }
     
@@ -192,6 +193,11 @@ public class AccountInfoPanel extends javax.swing.JPanel implements ILoginSensit
             //Create the model
             ret.setDataVector(null, columns);
         return ret;
+    }
+
+    @Override
+    public void updateData() {
+        //update other tables that need it
     }
 
 }
