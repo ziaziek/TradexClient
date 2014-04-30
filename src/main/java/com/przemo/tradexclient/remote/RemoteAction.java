@@ -85,17 +85,21 @@ public class RemoteAction {
     
     public static Equities getEquityQuotation(Equities eq) throws RemoteActionInitializationException, RemoteException, NotBoundException{
         IInfoController ctrl = (IInfoController) getRegistry().lookup(IInfoController.infoController_ID);
-        Equities ret = ctrl.requestQuotation(new Date(), eq, ConnectionHolder.getSessionId());      
+        Equities ret = ctrl.requestQuotation(new Date(), eq, ConnectionHolder.getSessionId()); 
         return ret;
     }
     
-    public static boolean placeOrder(Equities eq, double amount, double price, int type) throws RemoteActionInitializationException, RemoteException, NotBoundException{
+    public static boolean placeOrder(Equities eq, double amount, double price, int type) throws RemoteActionInitializationException, RemoteException, NotBoundException {
         //orders will be currently placed at the specific expiry term of 1 day
         IInfoController ctrl = (IInfoController) getRegistry().lookup(IInfoController.infoController_ID);
         List<OrderTypes> otypes = ctrl.requestAvailableOrderTypes();
-        IOrdersController oc = (IOrdersController)getRegistry().lookup(IOrdersController.ordersController_ID);
-        Calendar c = Calendar.getInstance();
-        c.add(Calendar.DAY_OF_MONTH, 1);
-        return oc.placeOrder(eq, amount, c.getTime(), otypes.get(type), ConnectionHolder.getSessionId())>0L;
+        if (otypes != null && !otypes.isEmpty()) {
+            IOrdersController oc = (IOrdersController) getRegistry().lookup(IOrdersController.ordersController_ID);
+            Calendar c = Calendar.getInstance();
+            c.add(Calendar.DAY_OF_MONTH, 1);
+            return oc.placeOrder(eq, amount, c.getTime(), otypes.get(type-1), ConnectionHolder.getSessionId()) > 0L;
+        } else {
+            return false;
+        }
     }
 }
