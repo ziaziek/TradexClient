@@ -73,7 +73,7 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
     }
     final void mainPanel(){
         mainPanel = new JPanel(new BorderLayout());
-        mainPanel.setBackground(Color.red);
+        //mainPanel.setBackground(Color.red);
         mainPanel.setPreferredSize(new Dimension(150, 150));
         this.add(mainPanel, BorderLayout.CENTER);
     }

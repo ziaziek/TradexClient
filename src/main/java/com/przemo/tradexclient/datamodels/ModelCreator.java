@@ -4,6 +4,7 @@
  */
 package com.przemo.tradexclient.datamodels;
 
+import com.przemo.tradex.data.Orders;
 import com.przemo.tradex.data.Transactions;
 import com.przemo.tradex.data.UserSessions;
 import java.util.List;
@@ -15,7 +16,12 @@ import java.util.List;
 public class ModelCreator {
     
     static Object[] activityModelColumns = new Object[] {"Login date", "Logout date", "IP Address"};
-
+    static Object[] ordersModelColumns = new Object[]{"Id", "Equity", "Quantity", "Expiration date"};
+    
+    public static Object[] getOpenOrdersModelColumns() {
+        return ordersModelColumns;
+    }
+    
     public static Object[] getActivityModelColumns() {
         return activityModelColumns;
     }
@@ -55,6 +61,22 @@ public class ModelCreator {
                 ret[p][2] = us.getQuantity();
                 ret[p][3] = us.getPrice();
                 ret[p][4] = us.getOrdersByBuyerOrderId().getOrderTypes().getOrderType();
+                p++;
+            }
+        }
+        return ret;
+    }
+    
+    public static Object[][] createOpenOrdersModelData(List<Orders> list){
+        Object[][] ret=null;
+        if(list!=null && !list.isEmpty()){
+            ret = new Object[list.size()][4];
+            int p=0;
+            for(Orders o:list){
+                ret[p][0]=o.getId();
+                ret[p][1]=o.getEquities().getEquitySymbol();
+                ret[p][2]=o.getQuantity();
+                ret[p][3]=o.getValidThru();
                 p++;
             }
         }

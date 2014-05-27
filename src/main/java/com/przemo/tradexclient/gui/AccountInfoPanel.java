@@ -14,6 +14,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -22,7 +23,7 @@ import javax.swing.table.DefaultTableModel;
  */
 public class AccountInfoPanel extends javax.swing.JPanel implements ILoginSensitive, IUpdateRequiring {
 
-    DefaultTableModel activityModel, transactionsModel = null;
+    DefaultTableModel activityModel, transactionsModel, openOrdersModel = null;
     
     /**
      * Creates new form AccountInfoPanel
@@ -49,6 +50,8 @@ public class AccountInfoPanel extends javax.swing.JPanel implements ILoginSensit
         jScrollPane3 = new javax.swing.JScrollPane();
         transactionsTable = new javax.swing.JTable();
         jPanel3 = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        openOrdersTable = new javax.swing.JTable();
         jPanel4 = new javax.swing.JPanel();
 
         accountTabPane.setName("Login Activity"); // NOI18N
@@ -74,7 +77,7 @@ public class AccountInfoPanel extends javax.swing.JPanel implements ILoginSensit
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 165, Short.MAX_VALUE)
+            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 156, Short.MAX_VALUE)
         );
 
         accountTabPane.addTab("Login Activity", jPanel1);
@@ -100,20 +103,33 @@ public class AccountInfoPanel extends javax.swing.JPanel implements ILoginSensit
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 165, Short.MAX_VALUE)
+            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 156, Short.MAX_VALUE)
         );
 
         accountTabPane.addTab("Transactions History", jPanel2);
+
+        openOrdersTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane1.setViewportView(openOrdersTable);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 790, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 790, Short.MAX_VALUE)
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 165, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 156, Short.MAX_VALUE)
         );
 
         accountTabPane.addTab("Open orders", jPanel3);
@@ -126,7 +142,7 @@ public class AccountInfoPanel extends javax.swing.JPanel implements ILoginSensit
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 165, Short.MAX_VALUE)
+            .addGap(0, 156, Short.MAX_VALUE)
         );
 
         accountTabPane.addTab("Account Balance", jPanel4);
@@ -144,7 +160,7 @@ public class AccountInfoPanel extends javax.swing.JPanel implements ILoginSensit
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(accountTabPane, javax.swing.GroupLayout.DEFAULT_SIZE, 190, Short.MAX_VALUE)
+                .addComponent(accountTabPane)
                 .addContainerGap())
         );
 
@@ -157,23 +173,27 @@ public class AccountInfoPanel extends javax.swing.JPanel implements ILoginSensit
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JTable logActivityTable;
+    private javax.swing.JTable openOrdersTable;
     private javax.swing.JTable transactionsTable;
     // End of variables declaration//GEN-END:variables
 
     private void initTables(){
-        if(activityModel==null){
-                activityModel= createEmptyModel(ModelCreator.getActivityModelColumns());
-                logActivityTable.setModel(activityModel);
-                activityModel.addTableModelListener(logActivityTable);
-            }
-        if(transactionsModel==null){
-            transactionsModel = createEmptyModel(ModelCreator.getTransactionsModelColumns());
-            transactionsTable.setModel(transactionsModel);
-            transactionsModel.addTableModelListener(transactionsTable);
-        }
+        initTable(activityModel, logActivityTable, ModelCreator.getActivityModelColumns());
+        initTable(transactionsModel, transactionsTable, ModelCreator.getTransactionsModelColumns());
+        initTable(openOrdersModel, openOrdersTable, ModelCreator.getOpenOrdersModelColumns());
+                
+    }
+    
+    private void initTable(DefaultTableModel model, JTable table, Object[] columns){
+        if(model==null){
+           model = createEmptyModel(columns);
+            table.setModel(model);
+            model.addTableModelListener(table); 
+        }      
     }
     
     @Override
@@ -197,7 +217,12 @@ public class AccountInfoPanel extends javax.swing.JPanel implements ILoginSensit
 
     @Override
     public void updateData() {
-        //update other tables that need it
+        try {
+            //update other tables that need it
+            ((DefaultTableModel)openOrdersTable.getModel()).setDataVector(ModelCreator.createOpenOrdersModelData(RemoteAction.getActiveUserOrders()), ModelCreator.getOpenOrdersModelColumns());
+        } catch (RemoteActionInitializationException | RemoteException | NotBoundException ex) {
+            Logger.getLogger(AccountInfoPanel.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
 }

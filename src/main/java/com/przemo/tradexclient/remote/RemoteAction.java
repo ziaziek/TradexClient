@@ -6,6 +6,7 @@ package com.przemo.tradexclient.remote;
 
 import com.przemo.tradex.data.Equities;
 import com.przemo.tradex.data.OrderTypes;
+import com.przemo.tradex.data.Orders;
 import com.przemo.tradex.data.UserSessions;
 import com.przemo.tradex.interfaces.IInfoController;
 import com.przemo.tradex.interfaces.ILoginController;
@@ -101,5 +102,12 @@ public class RemoteAction {
         } else {
             return false;
         }
+    }
+     
+    public static List<Orders> getActiveUserOrders() throws RemoteActionInitializationException, RemoteException, NotBoundException{
+        List<Orders> ret = null;
+        IInfoController ctrl = (IInfoController) getRegistry().lookup(IInfoController.infoController_ID);
+        ret = ctrl.requestOrders(ConnectionHolder.getSessionId(), true);
+        return ret;
     }
 }
