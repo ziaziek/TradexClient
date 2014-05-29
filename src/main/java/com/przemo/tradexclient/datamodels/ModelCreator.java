@@ -16,7 +16,7 @@ import java.util.List;
 public class ModelCreator {
     
     static Object[] activityModelColumns = new Object[] {"Login date", "Logout date", "IP Address"};
-    static Object[] ordersModelColumns = new Object[]{"Id", "Equity", "Quantity", "Expiration date"};
+    static Object[] ordersModelColumns = new Object[]{"Id", "Equity", "Type", "Quantity", "Expiration date"};
     
     public static Object[] getOpenOrdersModelColumns() {
         return ordersModelColumns;
@@ -70,13 +70,14 @@ public class ModelCreator {
     public static Object[][] createOpenOrdersModelData(List<Orders> list){
         Object[][] ret=null;
         if(list!=null && !list.isEmpty()){
-            ret = new Object[list.size()][4];
+            ret = new Object[list.size()][5];
             int p=0;
             for(Orders o:list){
                 ret[p][0]=o.getId();
                 ret[p][1]=o.getEquities().getEquitySymbol();
-                ret[p][2]=o.getQuantity();
-                ret[p][3]=o.getValidThru();
+                ret[p][2]=o.getOrderTypes().getDescription();
+                ret[p][3]=o.getQuantity();
+                ret[p][4]=o.getValidThru();
                 p++;
             }
         }
