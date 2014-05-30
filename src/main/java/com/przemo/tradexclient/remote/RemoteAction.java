@@ -103,6 +103,11 @@ public class RemoteAction {
             return false;
         }
     }
+    
+    public static boolean removeOrder(long id) throws RemoteActionInitializationException, RemoteException, NotBoundException {
+        IOrdersController oc = (IOrdersController) getRegistry().lookup(IOrdersController.ordersController_ID);
+        return (oc != null) && oc.removeOrder(id, ConnectionHolder.getSessionId()) > -1;
+    }
      
     public static List<Orders> getActiveUserOrders() throws RemoteActionInitializationException, RemoteException, NotBoundException{
         List<Orders> ret = null;

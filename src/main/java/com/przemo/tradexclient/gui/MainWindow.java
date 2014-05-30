@@ -159,6 +159,9 @@ public class MainWindow extends JFrame implements ActionListener, WindowListener
             case MenuBuilder.PLACE_ORDER:
                 new PlaceOrderForm(eqPanel.getCurrentlySelected()).setVisible(true);
                 break;
+            case MenuBuilder.REMOVE_ORDER:
+                new RemoveOrderForm().setVisible(true);
+                break;
         }
     }
 
